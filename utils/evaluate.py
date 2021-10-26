@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
+
 from scipy.stats import pearsonr
 import numpy as np
+
 
 def evaluate_scores(pred_scores, true_scores):
     pred_scores = np.array(pred_scores)

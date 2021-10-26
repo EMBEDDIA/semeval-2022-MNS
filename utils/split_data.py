@@ -3,9 +3,9 @@ import os
 
 
 # 90/10 split into train/test data
-def split_train_data_batch1():
+def split_train_data_batch1(train_csv='semeval-2022_task8_train-data_batch.csv'):
     
-    train_csv = 'semeval-2022_task8_train-data_batch.csv'
+    
     df = pd.read_csv(train_csv)
     train_split = df[df.url1_lang != 'fr']
     
