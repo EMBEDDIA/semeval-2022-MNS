@@ -34,16 +34,18 @@ def prune_vocabulary(documents, min_df=5, max_df=0.8, min_len=20):
 
 def prune_vocabulary2(documents_raw, min_df=5, max_df=0.8, min_len=20):
     print("Truncating vocab with min_word_freq =", min_df, "and max_doc_prop =", max_df)
-    #docs = [" ".join(doc) for doc in documents]
-    documents_unproc = []
-    documents_proc = [' '.join(clean_document(doc.lower())) for doc in documents_raw]
+    documents_clean = [' '.join(clean_document(doc.lower())) for doc in documents_raw]
+    print('documents_raw:', len(documents_raw))
+    print('documents_clean:', len(documents_clean))
     cvectorizer = CountVectorizer(min_df=min_df, max_df=max_df, stop_words=stops)
-    cvectorizer.fit_transform(documents_raw).sign()
+    cvectorizer.fit_transform(documents_clean).sign()
     dictionary = list(cvectorizer.vocabulary_)
     print("Truncated vocab size:", len(dictionary))
-    for i in range(len(documents_proc)):
-        pruned_doc = [w for w in documents_proc[i] if w in dictionary]
+    documents_unproc = []
+    documents_proc = []
+    for i in range(len(documents_clean)):
+        pruned_doc = [w for w in documents_clean[i].split() if w in dictionary]
         if len(pruned_doc) >= min_len:
-            documents_proc[i] = pruned_doc
-            documents_unproc[i] = documents_raw[i].lower()
+            documents_proc.append(' '.join(pruned_doc))
+            documents_unproc.append(documents_raw[i].lower())
     return documents_unproc, documents_proc

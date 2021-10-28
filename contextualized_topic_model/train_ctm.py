@@ -46,7 +46,7 @@ print("-"*10, "vocab size:", len(qt.vocab), "-"*10)
 ctm = ZeroShotTM(bow_size=len(qt.vocab),
                  contextual_size=768,
                  n_components=args.num_topics,
-                 num_epochs=100)
+                 num_epochs=250)
 
 ctm.fit(train_dataset=training_dataset,
         save_dir=args.save_dir)
