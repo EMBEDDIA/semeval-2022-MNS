@@ -4,6 +4,9 @@ import os
 import json
 import time
 from scipy.spatial import distance
+from sklearn.metrics.pairwise import paired_cosine_distances
+
+
 from evaluate import evaluate_scores
 
 import argparse
@@ -21,6 +24,14 @@ print("test_file:", args.test_file)
 print("-"*30 + "\n\n")
 
 
+# SemEval scores are in the range [1-4] where 1=most similar, 4=least
+def renormalise_similarity_score_semeval(scores):
+    # reverse the normalise I did for SBERT
+    scores = np.array(scores)
+    renormalised_scores = (3 - (scores * 3)) + 1
+    return renormalised_scores
+
+
 def compute_similarity_for_article_pairs(encoded_df, article_pairs):
     similarity = {}
     art_ids = list(encoded_df.id)
@@ -35,6 +46,7 @@ def compute_similarity_for_article_pairs(encoded_df, article_pairs):
             embedding1 = art_embeddings[index1]
             embedding2 = art_embeddings[index2]
             cosine_sim = distance.cosine(embedding1, embedding2)
+            # cosine_sim = util.cos_sim(embedding1, embedding2)
             #print('cosine_sim:', cosine_sim)
             similarity[pair] = cosine_sim
     return similarity
@@ -54,9 +66,11 @@ if __name__ == "__main__":
             pred_similarity.append(similarity[pair])
         else:
             pred_similarity.append(0.5)
-    print('pred_similarity:', pred_similarity)
-    print('true_similarity:', true_similarity)
-    pearson, p_val = evaluate_scores(pred_similarity, true_similarity)
+    # print('pred_similarity:', pred_similarity)
+    #print('true_similarity:', true_similarity)
+    final_scores = renormalise_similarity_score_semeval(pred_similarity)
+    print("final_scores:", final_scores)
+    pearson, p_val = evaluate_scores(final_scores, true_similarity)
 
 
 
