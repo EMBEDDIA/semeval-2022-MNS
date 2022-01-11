@@ -24,6 +24,14 @@ print("test_file:", args.test_file)
 print("-"*30 + "\n\n")
 
 
+# save predicted scores to csv
+def write_scores_to_file(pair_ids, true_scores, pred_scores, save_path):
+    df = {'pair_id': pair_ids, 'Overall-true': true_scores, 'Overall-pred': pred_scores}
+    df = pd.DataFrame.from_dict(df)
+    df.to_csv(save_path, index=False)
+    print("Done! Saved scores to dataframe", save_path, "!")
+
+
 # SemEval scores are in the range [1-4] where 1=most similar, 4=least
 def renormalise_similarity_score_semeval(scores):
     # reverse the normalise I did for SBERT
@@ -45,7 +53,7 @@ def compute_similarity_for_article_pairs(encoded_df, article_pairs):
             index2 = art_ids.index(id2)
             embedding1 = art_embeddings[index1]
             embedding2 = art_embeddings[index2]
-            cosine_sim = distance.cosine(embedding1, embedding2)
+            cosine_sim = 1-distance.cosine(embedding1, embedding2)
             # cosine_sim = util.cos_sim(embedding1, embedding2)
             #print('cosine_sim:', cosine_sim)
             similarity[pair] = cosine_sim
@@ -56,8 +64,8 @@ if __name__ == "__main__":
     encoded_df = pd.read_csv(os.path.join(args.data_path, args.encoded_file))
     test_df = pd.read_csv(os.path.join(args.data_path, args.test_file))
     test_pairs = list(test_df.pair_id)
+    true_scores = np.array(test_df.Overall)
     similarity = compute_similarity_for_article_pairs(encoded_df, test_pairs)
-    true_similarity = np.array(test_df.Overall)
     # baseline: sample values from Gaussian
     #pred_similarity = np.random.normal(loc=0.5, scale=0.5, size=true_similarity.shape[0])
     pred_similarity = []
@@ -69,8 +77,11 @@ if __name__ == "__main__":
     # print('pred_similarity:', pred_similarity)
     #print('true_similarity:', true_similarity)
     final_scores = renormalise_similarity_score_semeval(pred_similarity)
-    print("final_scores:", final_scores)
-    pearson, p_val = evaluate_scores(final_scores, true_similarity)
+    save_filename = args.encoded_file[:-4] + "-predictions.csv"
+    save_path = os.path.join(args.data_path, save_filename)
+    write_scores_to_file(test_pairs, true_scores, final_scores, save_path)
+    # print("final_scores:", final_scores)
+    pearson, p_val = evaluate_scores(final_scores, true_scores)
 
 
 
