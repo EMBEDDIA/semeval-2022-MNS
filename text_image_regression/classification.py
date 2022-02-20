@@ -2,13 +2,10 @@
 from torch import nn
 import os.path
 from ast import literal_eval
-import requests
 from PIL import Image
 from transformers import ViTFeatureExtractor, ViTModel
-from nltk.tokenize import word_tokenize
 import random
 import os
-from sklearn.preprocessing import LabelBinarizer
 from tqdm import tqdm
 import argparse
 from transformers import (AutoTokenizer, AutoConfig,
@@ -33,20 +30,6 @@ torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 
-# Creating the customized model
-n_heads = 8
-head_dims = 128
-d_model = n_heads * head_dims
-num_layers = 2
-feedforward_dim = int(2 * d_model)
-trans_dropout = 0.45
-attn_type = 'transformer'
-after_norm = 1
-fc_dropout = 0.4
-scale = attn_type == 'transformer'
-dropout_attn = None
-pos_embed = 'fix'
-
 # Defining some key variables that will be used later on in the training
 MAX_LEN = 256
 LEARNING_RATE = 1e-05
@@ -56,7 +39,6 @@ IMAGE_MODEL = 'google/vit-base-patch16-224'
 # IMAGE_MODEL = 'openai/clip-vit-base-patch32'
 # IMAGE_MODEL = 'openai/clip-vit-large-patch14'
 feature_extractor = ViTFeatureExtractor.from_pretrained(IMAGE_MODEL)
-
 
 parser = argparse.ArgumentParser()
 
@@ -74,11 +56,6 @@ parser.add_argument(
     '--dev_file',
     type=str,
     default="../data/test_split_batch2_entities.csv",
-    help='Test file (test.csv)')
-parser.add_argument(
-    '--test_not_labeled',
-    type=str,
-    default="../../DATA/TREC-IS/test_not_labeled.csv",
     help='Test file (test.csv)')
 parser.add_argument(
     '--out',
@@ -478,11 +455,6 @@ class BERTClass(torch.nn.Module):
         self.vit = ViTModel.from_pretrained(IMAGE_MODEL)
 
         self.dropout = torch.nn.Dropout(0.3)
-        self.fc_dropout = torch.nn.Dropout(fc_dropout)
-
-        self.in_fc = torch.nn.Linear(self.bert.config.hidden_size, d_model)
-        self.fc_dropout = torch.nn.Dropout(fc_dropout)
-
         self.drop = nn.Dropout(0.3)
 
         self.linear_types = nn.ModuleList()
@@ -697,30 +669,6 @@ if args.do_train:
         args.model_name_or_path,
         do_lower_case=args.do_lower_case,
         truncation=True)
-
-    import string
-    punctuation = list(string.punctuation)
-    punctuation.append('``')
-    punctuation.append("'s")
-    punctuation.append("''")
-    punctuation.append("--")
-    punctuation.append('’')
-    punctuation.append('“')
-    punctuation.append('”')
-
-    added_tokens = {}
-
-    from nltk import FreqDist
-    freq_dist = FreqDist(added_tokens)
-    print(freq_dist.most_common(100))
-    #freq_dist = FreqDist(added_tokens)
-    print(len(added_tokens))
-    if len(added_tokens) > 1:
-        print("[ BEFORE ] tokenizer vocab size:", len(tokenizer))
-        added_tokens = tokenizer.add_tokens(
-            [x[0] for x in freq_dist.most_common(100)])
-        print("[ AFTER ] tokenizer vocab size:", len(tokenizer))
-        print('added_tokens:', added_tokens)
 
     train_params = {'batch_size': TRAIN_BATCH_SIZE,
                     'shuffle': True,
