@@ -7,7 +7,7 @@ We cover several techniques and propose different methods for finding the multil
 
 Our findings show that, while our researched methods obtained promising results, exploiting the **semantic textual similarity** with sentence representations is unbeatable. Finally, in the official SemEval 2022 Task 8, we ranked **fifth in the overall team ranking** cross-lingual results, and **second in the English-only results**.
 
-## Paper: TBD (To be presented as SemEval 2022 workshop on 14 July 2022, co-located with NAACL)
+### Link to paper: TBD (To be presented as SemEval 2022 workshop on 14 July 2022, co-located with NAACL)
 
 
 # Regression (Text+Image)
