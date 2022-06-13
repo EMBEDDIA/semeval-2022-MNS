@@ -1,4 +1,8 @@
-# semeval-2022-MNS
+# EMBEDDIA at SemEval 2022 Task 8
+
+This is the codebase for our experiments for Task 8: Multilingual news similarity
+
+Paper: TBD (To be presented as SemEval 2022 workshop on 14 July 2022, co-located with NAACL)
 
 
 # Regression (Text+Image)
